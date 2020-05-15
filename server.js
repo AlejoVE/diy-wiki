@@ -10,12 +10,12 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // Uncomment this out once you've made your first route.
-// app.use(express.static(path.join(__dirname, 'client', 'build')));
+app.use(express.static(path.join(__dirname, 'client', 'build')));
 
 // some helper functions you can use
-const readFile = util.promisify(fs.readFile);
-const writeFile = util.promisify(fs.writeFile);
-const readDir = util.promisify(fs.readdir);
+const readFilePromise = util.promisify(fs.readFile);
+const writeFilePromise = util.promisify(fs.writeFile);
+const readDirPromise = util.promisify(fs.readdir);
 
 // some more helper functions
 const DATA_DIR = 'data';
@@ -34,6 +34,17 @@ function jsonError(res, message) {
 // If you want to see the wiki client, run npm install && npm build in the client folder,
 // statically serve /client/build
 
+app.get('/api/page/:slug', (req, res) => {
+  const fileName = req.params.slug;
+  console.log(fileName);
+  const URL = slugToPath(fileName);
+  console.log(URL);
+  readFilePromise(URL, 'utf-8')
+    .then((fileContent) => {
+      jsonOK(res, { body: fileContent });
+    })
+    .catch((err) => jsonError(res, 'Page does not exist.'));
+});
 // GET: '/api/page/:slug'
 // success response: {status: 'ok', body: '<file contents>'}
 // failure response: {status: 'error', message: 'Page does not exist.'}
@@ -61,7 +72,7 @@ function jsonError(res, message) {
 app.get('/api/page/all', async (req, res) => {
   const names = await fs.readdir(DATA_DIR);
   console.log(names);
-  jsonOK(res, { });
+  jsonOK(res, {});
 });
 
 const port = process.env.PORT || 5000;
