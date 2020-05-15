@@ -8,9 +8,10 @@ const fs = require('fs');
 const app = express();
 app.use(cors());
 app.use(bodyParser.json());
+app.use(bodyParser.raw({ type: 'text/plain' }));
 
 // Uncomment this out once you've made your first route.
-app.use(express.static(path.join(__dirname, 'client', 'build')));
+// app.use(express.static(path.join(__dirname, 'client', 'build')));
 
 // some helper functions you can use
 const readFilePromise = util.promisify(fs.readFile);
@@ -36,19 +37,26 @@ function jsonError(res, message) {
 
 app.get('/api/page/:slug', (req, res) => {
   const fileName = req.params.slug;
-  console.log(fileName);
   const URL = slugToPath(fileName);
-  console.log(URL);
   readFilePromise(URL, 'utf-8')
     .then((fileContent) => {
       jsonOK(res, { body: fileContent });
     })
     .catch((err) => jsonError(res, 'Page does not exist.'));
 });
-// GET: '/api/page/:slug'
-// success response: {status: 'ok', body: '<file contents>'}
-// failure response: {status: 'error', message: 'Page does not exist.'}
 
+app.post('/api/page/:slug', (req, res) => {
+  const body = req.body.body;
+  const fileName = req.params.slug;
+  const URL = slugToPath(fileName);
+  writeFilePromise(URL, body)
+    .then(() => {
+      jsonOK(res, { body: body });
+    })
+    .catch((err) => {
+      jsonError(err, 'Could not write page.');
+    });
+});
 // POST: '/api/page/:slug'
 // body: {body: '<file text content>'}
 // success response: {status: 'ok'}

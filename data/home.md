@@ -6,6 +6,6 @@ This is how you change stuff!!
 
 Here's the [about](about) page.
 
-#home #default
+#home #default #test
 
 [new file](new-file)
