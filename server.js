@@ -60,14 +60,22 @@ app.post('/api/page/:slug', (req, res) => {
 
 app.get('/api/pages/all', async (req, res) => {
   try {
-    const pages = await readDirPromise(DATA_DIR, 'utf-8');
+    let pages = await readDirPromise(DATA_DIR, 'utf-8');
     let list = pages.map((page) => page.replace('.md', ''));
-    console.log(list);
-    res.send({ status: 'ok', body: list });
+    jsonOK(res, { pages: list });
   } catch (err) {
     jsonError(err, 'Error loading the page');
   }
 });
+
+// app.get('/api/pages/all', async (req, res) => {
+//   const files = await readDir(DATA_DIR);
+//   data = [];
+//   files.forEach((el) => {
+//     data.push(el.substring(0, el.length - 3));
+//   });
+//   res.json({ status: 'ok', pages: data });
+// });
 
 // GET: '/api/pages/all'
 // success response: {status:'ok', pages: ['fileName', 'otherFileName']}
