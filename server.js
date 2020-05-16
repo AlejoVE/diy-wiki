@@ -36,8 +36,8 @@ function jsonError(res, message) {
 // statically serve /client/build
 
 app.get('/api/page/:slug', (req, res) => {
-  const fileName = req.params.slug;
-  const URL = slugToPath(fileName);
+  let fileName = req.params.slug;
+  let URL = slugToPath(fileName);
   readFilePromise(URL, 'utf-8')
     .then((fileContent) => {
       jsonOK(res, { body: fileContent });
@@ -46,9 +46,9 @@ app.get('/api/page/:slug', (req, res) => {
 });
 
 app.post('/api/page/:slug', (req, res) => {
-  const body = req.body.body;
-  const fileName = req.params.slug;
-  const URL = slugToPath(fileName);
+  let body = req.body.body;
+  let fileName = req.params.slug;
+  let URL = slugToPath(fileName);
   writeFilePromise(URL, body)
     .then(() => {
       jsonOK(res, { body: body });
@@ -57,10 +57,25 @@ app.post('/api/page/:slug', (req, res) => {
       jsonError(err, 'Could not write page.');
     });
 });
-// POST: '/api/page/:slug'
-// body: {body: '<file text content>'}
-// success response: {status: 'ok'}
-// failure response: {status: 'error', message: 'Could not write page.'}
+
+app.get('/api/pages/all', async (req, res) => {
+  try {
+    let pages = await readDirPromise(DATA_DIR, 'utf-8');
+    let list = pages.map((page) => page.replace('.md', ''));
+    jsonOK(res, { pages: list });
+  } catch (err) {
+    jsonError(err, 'Error loading the page');
+  }
+});
+
+// app.get('/api/pages/all', async (req, res) => {
+//   const files = await readDir(DATA_DIR);
+//   data = [];
+//   files.forEach((el) => {
+//     data.push(el.substring(0, el.length - 3));
+//   });
+//   res.json({ status: 'ok', pages: data });
+// });
 
 // GET: '/api/pages/all'
 // success response: {status:'ok', pages: ['fileName', 'otherFileName']}
